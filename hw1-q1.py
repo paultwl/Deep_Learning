@@ -64,6 +64,7 @@ class Perceptron(LinearModel):
                     self.W[j] = self.W[j] + (y[j] * x_i)
 
         #raise NotImplementedError # Q1.1 (a)
+        #finished
 
 
 class LogisticRegression(LinearModel):
