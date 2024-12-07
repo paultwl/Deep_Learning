@@ -46,7 +46,24 @@ class Perceptron(LinearModel):
         y_i (scalar): the gold label for that example
         other arguments are ignored
         """
-        raise NotImplementedError # Q1.1 (a)
+
+        #initialize true value vector
+        y = np.ones(6,1)*(-1)
+        y[y_i] = 1
+
+        #calculating score z
+        z = self.W.T @ x_i  
+        y_pred = max(z)
+
+        #getting prediction vector y_hat by applying sign(z)
+        y_hat = np.where(z >= 0, 1, -1)
+
+        # 3. If (prediction) y_hat[j] != y[j] (true value), update w[j]
+        for j in len(y_hat):
+                if y_hat[j] != y[j]:
+                    self.W[j] = self.W[j] + (y[j] * x_i)
+
+        #raise NotImplementedError # Q1.1 (a)
 
 
 class LogisticRegression(LinearModel):
