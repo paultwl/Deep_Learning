@@ -48,20 +48,22 @@ class Perceptron(LinearModel):
         """
 
         #initialize true value vector
-        y = np.ones(6,1)*(-1)
+        y = np.ones(6,)*(-1)
         y[y_i] = 1
 
         #calculating score z
-        z = self.W.T @ x_i  
-        y_pred = max(z)
+        z = self.W @ x_i  
 
         #getting prediction vector y_hat by applying sign(z)
         y_hat = np.where(z >= 0, 1, -1)
-
+        #print(self.W[1])
         # 3. If (prediction) y_hat[j] != y[j] (true value), update w[j]
-        for j in len(y_hat):
+        old = np.copy(self.W)
+        for j in range(len(y_hat)):
                 if y_hat[j] != y[j]:
                     self.W[j] = self.W[j] + (y[j] * x_i)
+
+        #print("difference: ", old - self.W)
 
         #raise NotImplementedError # Q1.1 (a)
         #finished
@@ -74,7 +76,27 @@ class LogisticRegression(LinearModel):
         y_i: the gold label for that example
         learning_rate (float): keep it at the default value for your plots
         """
-        raise NotImplementedError # Q1.2 (a,b)
+         #initialize true value vector
+        y = np.zeros(6,) # 6 by 1 vector
+        y[y_i] = 1
+
+        #calculating score z pre-sigmoid
+        z = self.W @ x_i # 6 by 1 vector
+        
+        sum_z = np.sum(np.exp(z)) # scalar
+       
+        #getting y_hat by applying softmax transformation
+        softmax_z = np.exp(z)/sum_z
+
+        print('shape of predictions: ', softmax_z.shape)
+        print('\nshape of features: ', x_i.shape)
+
+        Loss = np.log(sum_z) - z
+        
+        L_grad = (softmax_z - 1) @ x_i.T
+
+        self.W = self.W - learning_rate*L_grad
+        #raise NotImplementedError # Q1.2 (a,b)
 
 
 class MLP(object):

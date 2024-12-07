@@ -1,2 +1,5 @@
 intel_landscapes.npz
 /data
+Pipfile
+Pipfile.lock
+.txt
