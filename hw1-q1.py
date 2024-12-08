@@ -46,27 +46,22 @@ class Perceptron(LinearModel):
         y_i (scalar): the gold label for that example
         other arguments are ignored
         """
-
         #initialize true value vector
         y = np.ones(6,)*(-1)
         y[y_i] = 1
+        print('y:', y)
 
         #calculating score z
         z = self.W @ x_i  
 
         #getting prediction vector y_hat by applying sign(z)
         y_hat = np.where(z >= 0, 1, -1)
-        #print(self.W[1])
         # 3. If (prediction) y_hat[j] != y[j] (true value), update w[j]
-        old = np.copy(self.W)
         for j in range(len(y_hat)):
                 if y_hat[j] != y[j]:
                     self.W[j] = self.W[j] + (y[j] * x_i)
-
-        #print("difference: ", old - self.W)
-
+        
         #raise NotImplementedError # Q1.1 (a)
-        #finished
 
 
 class LogisticRegression(LinearModel):
@@ -76,27 +71,23 @@ class LogisticRegression(LinearModel):
         y_i: the gold label for that example
         learning_rate (float): keep it at the default value for your plots
         """
-         #initialize true value vector
-        y = np.zeros(6,) # 6 by 1 vector
+        # calculating score z
+        z = self.W @ x_i
+
+        # calucalting softmax 
+        P = np.exp(z)/np.sum(np.exp(z))
+
+        # correct class
+        y = np.zeros(6)
         y[y_i] = 1
-
-        #calculating score z pre-sigmoid
-        z = self.W @ x_i # 6 by 1 vector
         
-        sum_z = np.sum(np.exp(z)) # scalar
-       
-        #getting y_hat by applying softmax transformation
-        softmax_z = np.exp(z)/sum_z
+        # gradient of loss function
+        loss_grad = np.outer((P - y), x_i)
 
-        print('shape of predictions: ', softmax_z.shape)
-        print('\nshape of features: ', x_i.shape)
+        # weight updatea
+        self.W = self.W - learning_rate * (loss_grad + l2_penalty * self.W)
 
-        Loss = np.log(sum_z) - z
-        
-        L_grad = (softmax_z - 1) @ x_i.T
-
-        self.W = self.W - learning_rate*L_grad
-        #raise NotImplementedError # Q1.2 (a,b)
+       #raise NotImplementedError # Q1.2 (a,b)
 
 
 class MLP(object):
