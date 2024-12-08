@@ -92,22 +92,10 @@ class LogisticRegression(LinearModel):
 
 class MLP(object):
     def __init__(self, n_classes, n_features, hidden_size):
-        # Initialize an MLP with a single hidden layer.
-<<<<<<< HEAD
-        # self.W1 = np.zeros((hidden_size, n_features + 1))
-        # self.W2 = np.zeros((n_classes, hidden_size + 1))
-
-        #self.W1 = np.random.normal(loc=0.1, scale=0.1, size=(hidden_size, n_features))
-        #self.W2 = np.random.normal(loc=0.1, scale=0.1, size=(n_classes, hidden_size))
-
         self.W1 = np.append(np.random.normal(loc=0.1, scale=0.1, size=(hidden_size, n_features)), np.zeros((hidden_size, 1)), axis=1)
         self.W2 = np.append(np.random.normal(loc=0.1, scale=0.1, size=(n_classes, hidden_size)), np.zeros((n_classes, 1)), axis=1)
-=======
-        self.W = np.zeros((n_classes, n_features+1)) #+1 to add the bias term
-        raise NotImplementedError # Q1.3 (a)
->>>>>>> ba53fc3 (modeling epoch train)
-
-    def predict(self, X):
+    
+    def fprop(self, X):
         # Compute the forward pass of the network. At prediction time, there is
         # no need to save the values of hidden nodes.
 
@@ -124,20 +112,20 @@ class MLP(object):
         z2 = self.W2 @ h
         #print('z2: ', z2.shape)
 
-        predicted_label = np.zeros((z2.shape[1], 1))
+        return (X_b, z1, h, z2)
+    
+    def predict(self, X):
+        # Compute the forward pass of the network. At prediction time, there is
+        # no need to save the values of hidden nodes.
+        _, _, _, z2 = self.fprop(self, X)
+        
+        predicted_labels = np.zeros((z2.shape[1], 1))
         for i in range(z2.shape[1]):
             row = z2.T[i]
-            print(row)
-            print('upper: ', np.exp(row - max(row)))
-            #print('under: ', np.sum(np.exp(row - max(row))))
             softmax = np.exp(row - max(row))/np.sum(np.exp(row - max(row)))
-            #print('softmax', softmax)
-            predicted_label[i] = softmax.argmax()
-            #print('pred', predicted_label[i])
-
-        print(predicted_label)
+            predicted_labels[i] = softmax.argmax()
         
-        return predicted_label
+        return predicted_labels
 
     def evaluate(self, X, y):
         """
@@ -154,6 +142,13 @@ class MLP(object):
         """
         Dont forget to return the loss of the epoch.
         """
+        #Stochastic gradient loss
+        random_indices = np.random.choice(matrix.shape[0], size=num_rows, replace=False)
+        random_rows = matrix[random_indices]
+        for image in X:
+            X_b, z1, h, z2 = self.fprop(self, image)
+
+        L_epoch = 
         raise NotImplementedError # Q1.3 (a)
 
 
