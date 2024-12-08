@@ -100,26 +100,27 @@ class MLP(object):
         # no need to save the values of hidden nodes.
 
         # add bias term 
+        #print("shape of x: ", X.shape)
         X_b =np.append(X, np.ones((X.shape[0], 1)), axis=1)
-
+        if (self.W1.shape[1] != X_b.T.shape[0]): print("W: ", self.W1.shape, "\nX_b_t: ", X_b.T.shape)
         z1 = self.W1 @ X_b.T
-
+        
         #activation 
         h = z1 * (z1 > 0)
-        #print("RELU:", h)
         h = np.append(h, np.ones((1, h.shape[1])), axis=0)
-
         z2 = self.W2 @ h
-        #print('z2: ', z2.shape)
+        #normalize z2 to avoid errors with exponentials
+        #z2 = z2 / np.max(z2)
+        #print('z2 norm: ', z2.shape)
 
         return (X_b, z1, h, z2)
     
     def predict(self, X):
         # Compute the forward pass of the network. At prediction time, there is
         # no need to save the values of hidden nodes.
-        _, _, _, z2 = self.fprop(self, X)
+        _, _, _, z2 = self.fprop(X)
         
-        predicted_labels = np.zeros((z2.shape[1], 1))
+        predicted_labels = np.zeros((z2.shape[1],))
         for i in range(z2.shape[1]):
             row = z2.T[i]
             softmax = np.exp(row - max(row))/np.sum(np.exp(row - max(row)))
@@ -134,6 +135,7 @@ class MLP(object):
         """
         # Identical to LinearModel.evaluate()
         y_hat = self.predict(X)
+        print("y_hat & y shapes: ", y_hat.shape, " , ", y.shape)
         n_correct = (y == y_hat).sum()
         n_possible = y.shape[0]
         return n_correct / n_possible
@@ -143,13 +145,42 @@ class MLP(object):
         Dont forget to return the loss of the epoch.
         """
         #Stochastic gradient loss
-        random_indices = np.random.choice(matrix.shape[0], size=num_rows, replace=False)
-        random_rows = matrix[random_indices]
-        for image in X:
-            X_b, z1, h, z2 = self.fprop(self, image)
+        #random_indices = np.random.choice(X.shape[0], size=1, replace=False)
+        #random_rows = X[random_indices]
+        Loss = 0
+        print("calling train_epoch")
+        for i in range(X.shape[0]):
+            image = X[i]
+            #print("shape of image vector: ", image.shape)
+            image = image.reshape((image.shape[0],1)).T
+            #print("shape of image vector: ", image.shape)
+            X_b, z1, h, z2 = self.fprop(image)
+            if i < 1 : print("\nX_b shape: ", X_b.shape, "\nz1 shape: ", z1.shape, "\nh shape:", h.shape, "\nz2 shape:", z2.shape)
+            P = np.exp(z2 - max(z2))/np.sum(np.exp(z2 - max(z2)))
+            
+            y_true = np.zeros((6, 1))
+            y_true[y[i]] = 1
+            
+            Loss += y_true.T @ np.log(P+0.00001)
 
-        L_epoch = 
-        raise NotImplementedError # Q1.3 (a)
+            L_grad = P - y_true
+            W2_grad = L_grad @ h.T
+            h_grad = (self.W2.T @ L_grad)
+
+            
+            #derivative of relu when z>0 = 1, else 0
+            z1_grad = h_grad[:-1] * np.where(z1>0, 1, 0)
+
+            W1_grad = z1_grad @ X_b
+
+            #updates (with biases inside weight vectors)
+            self.W1 = self.W1 - learning_rate * W1_grad
+            self.W2 = self.W2 - learning_rate * W2_grad
+ 
+        L_epoch = Loss/(X.shape[0])
+        print(L_epoch)
+        return L_epoch
+        #raise NotImplementedError # Q1.3 (a)
 
 
 def plot(epochs, train_accs, val_accs, filename=None):
