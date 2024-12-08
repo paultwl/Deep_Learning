@@ -93,6 +93,7 @@ class LogisticRegression(LinearModel):
 class MLP(object):
     def __init__(self, n_classes, n_features, hidden_size):
         # Initialize an MLP with a single hidden layer.
+<<<<<<< HEAD
         # self.W1 = np.zeros((hidden_size, n_features + 1))
         # self.W2 = np.zeros((n_classes, hidden_size + 1))
 
@@ -101,6 +102,10 @@ class MLP(object):
 
         self.W1 = np.append(np.random.normal(loc=0.1, scale=0.1, size=(hidden_size, n_features)), np.zeros((hidden_size, 1)), axis=1)
         self.W2 = np.append(np.random.normal(loc=0.1, scale=0.1, size=(n_classes, hidden_size)), np.zeros((n_classes, 1)), axis=1)
+=======
+        self.W = np.zeros((n_classes, n_features+1)) #+1 to add the bias term
+        raise NotImplementedError # Q1.3 (a)
+>>>>>>> ba53fc3 (modeling epoch train)
 
     def predict(self, X):
         # Compute the forward pass of the network. At prediction time, there is
