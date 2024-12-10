@@ -68,8 +68,32 @@ class FeedforwardNetwork(nn.Module):
         includes modules for several activation functions and dropout as well.
         """
         super().__init__()
-        # Implement me!
-        raise NotImplementedError
+        
+        if activation_type.lower() == 'relu': 
+            activation = nn.ReLU()
+        elif activation_type.lower() == 'tanh': 
+            activation = nn.Tanh()
+        else: 
+            ValueError('Use activation ReLU by default')
+
+        # build network
+        networkArcitechture = []
+
+        # input - > hidden layer 1
+        networkArcitechture.append(nn.Linear(n_features, hidden_size))
+        networkArcitechture.append(activation)
+        networkArcitechture.append(nn.Dropout(dropout))
+
+        # hidden layer 1 -> hidden layer x
+        for _ in range(layers - 1): 
+            networkArcitechture.append(nn.Linear(hidden_size, hidden_size))
+            networkArcitechture.append(activation)
+            networkArcitechture.append(nn.Dropout(dropout))
+        
+        # hidden layer x -> output 
+        networkArcitechture.append(nn.Linear(hidden_size, n_classes))
+
+        self.finalArc = nn.Sequential(*networkArcitechture)
 
     def forward(self, x, **kwargs):
         """
@@ -79,6 +103,8 @@ class FeedforwardNetwork(nn.Module):
         the output logits from x. This will include using various hidden
         layers, pointwise nonlinear functions, and dropout.
         """
+        z = self.finalArc(x)
+        return z
         raise NotImplementedError
 
 
