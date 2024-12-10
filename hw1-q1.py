@@ -148,25 +148,26 @@ class MLP(object):
         #random_indices = np.random.choice(X.shape[0], size=1, replace=False)
         #random_rows = X[random_indices]
         Loss = 0
-        print("calling train_epoch")
+
         for i in range(X.shape[0]):
-            image = X[i]
-            #print("shape of image vector: ", image.shape)
-            image = image.reshape((image.shape[0],1)).T
-            #print("shape of image vector: ", image.shape)
+            image = X[i].reshape((X.shape[1],1)).T
+            #image = image
             X_b, z1, h, z2 = self.fprop(image)
-            if i < 1 : print("\nX_b shape: ", X_b.shape, "\nz1 shape: ", z1.shape, "\nh shape:", h.shape, "\nz2 shape:", z2.shape)
-            P = np.exp(z2 - max(z2))/np.sum(np.exp(z2 - max(z2)))
+            #if i < 1 : print("\nX_b shape: ", X_b.shape, "\nz1 shape: ", z1.shape, "\nh shape:", h.shape, "\nz2 shape:", z2.shape)
             
+            #normalize z2 scores:
+            z2 = z2 - max(z2)
+            z_sum = np.sum(np.exp(z2))
+
             y_true = np.zeros((6, 1))
             y_true[y[i]] = 1
             
-            Loss += y_true.T @ np.log(P+0.00001)
+            Loss += (y_true.T @ (z2) + np.log(z_sum))[0][0]
 
-            L_grad = P - y_true
+            L_grad = (np.exp(z2)/z_sum) - y_true
+
             W2_grad = L_grad @ h.T
-            h_grad = (self.W2.T @ L_grad)
-
+            h_grad = (self.W2.T @ L_grad)            
             
             #derivative of relu when z>0 = 1, else 0
             z1_grad = h_grad[:-1] * np.where(z1>0, 1, 0)
@@ -177,8 +178,9 @@ class MLP(object):
             self.W1 = self.W1 - learning_rate * W1_grad
             self.W2 = self.W2 - learning_rate * W2_grad
  
-        L_epoch = Loss/(X.shape[0])
-        print(L_epoch)
+        L_epoch = Loss/X.shape[0]
+        print("denominator: ", X.shape[0] )
+        print("Loss: ", L_epoch)
         return L_epoch
         #raise NotImplementedError # Q1.3 (a)
 
