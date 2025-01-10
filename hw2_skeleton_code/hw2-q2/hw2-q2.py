@@ -187,17 +187,6 @@ def plot(epochs, plottable, ylabel='', name=''):
 
 def get_number_trainable_params(model):
     
-    # Collect trainable parameters from the nn
-    params = (
-        list(model.block_1.parameters()) +
-        list(model.block_2.parameters()) +
-        list(model.block_3.parameters()) + 
-        list(model.mlp_layer_1.parameters()) + 
-        list(model.mlp_layer_2.parameters()) +
-        list(model.mlp_out.parameters())
-    )
-    model.parameters()
-    
     # Sum the number of elements for all trainable parameters
     cnn_params_count = sum(p.numel() for p in model.parameters() if p.requires_grad)
     
